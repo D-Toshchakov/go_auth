@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const cookieJWT = "jwt"
 const SecretKey = "secret"
 
 func Register(c *fiber.Ctx) error {
@@ -73,7 +74,7 @@ func Login(c *fiber.Ctx) error {
 	}
 	
 	cookie := fiber.Cookie{
-		Name: "jwt",
+		Name: cookieJWT,
 		Value: token,
 		Expires: time.Now().Add(time.Hour*24),
 		HTTPOnly: true,
@@ -84,4 +85,26 @@ func Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Success",
 	})
+}
+
+func User(c *fiber.Ctx) error {
+	cookie := c.Cookies(cookieJWT)
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "unauthenticated",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var user models.User
+
+	database.DB.Where("id = ?", claims.Issuer).First(&user)
+
+	return c.JSON(user)
 }
