@@ -22,7 +22,7 @@ func Connect() {
 	dbUser := os.Getenv("DBUSER")
 	dbPassword := os.Getenv("DBPASSWORD")
 	dbName := os.Getenv("DBNAME")
-	connString := fmt.Sprintf("%s:%s@/%s",dbUser, dbPassword, dbName)
+	connString := fmt.Sprintf("%s:%s@/%s", dbUser, dbPassword, dbName)
 	
 	connection, err := gorm.Open(mysql.Open(connString), &gorm.Config{})
 	if err != nil {

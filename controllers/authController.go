@@ -40,7 +40,7 @@ func Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-	
+
 	var user = models.User{}
 
 	database.DB.Where("email = ?", data["email"]).First(&user)
@@ -61,22 +61,22 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer: strconv.Itoa(int(user.Id)),
-		ExpiresAt: time.Now().Add(time.Hour*24).Unix(),
+		Issuer:    strconv.Itoa(int(user.Id)),
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	token, err := claims.SignedString([]byte(SecretKey ))
-	if err!= nil {
+	token, err := claims.SignedString([]byte(SecretKey))
+	if err != nil {
 		c.Status(fiber.StatusInternalServerError)
 		return c.JSON(fiber.Map{
 			"message": "could not login",
 		})
 	}
-	
+
 	cookie := fiber.Cookie{
-		Name: cookieJWT,
-		Value: token,
-		Expires: time.Now().Add(time.Hour*24),
+		Name:     cookieJWT,
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
 	}
 
@@ -111,9 +111,9 @@ func User(c *fiber.Ctx) error {
 
 func Logout(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
-		Name: cookieJWT,
-		Value: "",
-		Expires: time.Now().Add(-time.Hour),
+		Name:     cookieJWT,
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
 		HTTPOnly: true,
 	}
 	c.Cookie(&cookie)
